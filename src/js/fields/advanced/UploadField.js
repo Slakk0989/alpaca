@@ -97,7 +97,14 @@
                             if (self.isArrayType())
                             {
                                 var array = self.getValueAsArray();
-                                array.splice(fileIndex, 1);
+                                // find good file index
+                                var fileIdx = 0;
+                                for (var i = 0; i < array.length; i++) {
+                                    if (array[i].url == file.url) {
+                                        fileIdx = i;
+                                    }
+                                }
+                                array.splice(fileIdx, 1);
                                 self.setValueAsArray(array);
                             }
                             else if (self.isObjectType())
