@@ -21,14 +21,14 @@
                         <thead>
                             <tr>
                                 {{#if options.showUploadPreview}}
-                                    <td>Thumbnail</td>
+                                    <td>{{thumbnailMessage}}</td>
                                 {{else}}
                                     <td></td>
                                 {{/if}}
-                                <td>Name</td>
-                                <td>Size</td>
+                                <td>{{nameMessage}}</td>
+                                <td>{{sizeMessage}}</td>
                                 <td colspan="2"></td><!-- error or start or progress indicator -->
-                                <td>Actions</td>
+                                <td>{{actionsMessage}}</td>
                             </tr>
                         </thead>
                         {{/if}}

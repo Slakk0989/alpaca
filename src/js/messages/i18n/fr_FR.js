@@ -39,8 +39,18 @@
 				"invalidPassword": "Mot de passe invalide",
 				"invalidPhone": "Numéro de téléphone invalide, ex: (123) 456-9999",
 				"invalidPattern": "Ce champ doit correspondre au motif {0}",
-                "stringTooShort": "Ce champ doit contenir au moins {0} caractères",
-                "stringTooLong": "Ce champ doit contenir au plus {0} caractères"
+				"stringTooShort": "Ce champ doit contenir au moins {0} caractères",
+				"stringTooLong": "Ce champ doit contenir au plus {0} caractères",
+				"chooseFile": "Sélectionnez un fichier...",
+				"chooseFiles": "Sélectionnez des fichiers...",
+				"dropZoneSingle": "Cliquez sur le bouton Sélection ou glissez déposez un fichier ici...",
+				"dropZoneMultiple": "Cliquez sur le bouton Sélection ou glissez déposez des fichiers ici...",
+				"thumbnail": "Aperçu",
+				"name": "Nom",
+				"size": "Taille",
+				"actions": "Actions",
+				"filetypeNotAccepted": "Type de fichier non accepté : {0}",
+				"filesizeTooBig": "Fichier trop gros : {0}"
             }
         }
     });

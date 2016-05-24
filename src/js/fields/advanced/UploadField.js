@@ -343,6 +343,11 @@
                     }
                 }
 
+                model.thumbnailMessage = self.getMessage("thumbnail");
+                model.nameMessage = self.getMessage("name");
+                model.sizeMessage = self.getMessage("size");
+                model.actionsMessage = self.getMessage("actions");
+
                 callback(model);
             });
         },
@@ -478,7 +483,7 @@
 
                             if (!re.test(data.files[i]["type"]))
                             {
-                                uploadErrors.push('Not an accepted file type: ' + data.files[i]["type"]);
+                                uploadErrors.push(Alpaca.substituteTokens(self.getMessage("filetypeNotAccepted"), [data.files[i]["type"]]));
                                 bad = true;
                             }
                         }
@@ -487,7 +492,7 @@
                         if (self.options.maxFileSize > -1)
                         {
                             if (data.files[i].size > self.options.maxFileSize) {
-                                uploadErrors.push('Filesize is too big: ' + data.files[i].size);
+                                uploadErrors.push(Alpaca.substituteTokens(self.getMessage("filesizeTooBig"), [data.files[i].size]));
                                 bad = true;
                             }
                         }
@@ -1198,7 +1203,13 @@
         "chooseFile": "Choose File...",
         "chooseFiles": "Choose Files...",
         "dropZoneSingle": "Click the Choose button or Drag and Drop a file here to upload...",
-        "dropZoneMultiple": "Click the Choose button or Drag and Drop files here to upload..."
+        "dropZoneMultiple": "Click the Choose button or Drag and Drop files here to upload...",
+        "thumbnail": "Thumbnail",
+        "name": "Name",
+        "size": "Size",
+        "actions": "Actions",
+        "filetypeNotAccepted": "Not an accepted file type: {0}",
+        "filesizeTooBig": "Filesize is too big: {0}"
     });
 
     // https://github.com/private-face/jquery.bind-first/blob/master/dev/jquery.bind-first.js
