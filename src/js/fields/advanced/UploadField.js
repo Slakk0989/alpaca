@@ -412,7 +412,7 @@
             fileUploadConfig["downloadTemplateId"] = null;
             fileUploadConfig["downloadTemplate"] = this.getDownloadTemplate();
             fileUploadConfig["filesContainer"] = $(el).find(".files");
-            fileUploadConfig["dropZone"] = $(el).find(".fileupload-active-zone");
+            fileUploadConfig["dropZone"] = $(el).find(".fileupload-active-zone p.dropzone-message");
             fileUploadConfig["url"] = "/";
             fileUploadConfig["method"] = "post";
             fileUploadConfig["showUploadPreview"] = self.options.showUploadPreview;
