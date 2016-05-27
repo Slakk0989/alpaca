@@ -4,20 +4,16 @@
 
             {{#each checkboxOptions}}
             <div>
-                <input type="checkbox" name="{{name}}" id="{{name}}-{{@index}}" data-checkbox-index="{{@index}}" data-checkbox-value="{{value}}" {{#if ../../options.readonly}}readonly="readonly"{{/if}} {{#each ../../options.data}}data-{{@key}}="{{value}}"{{/each}}>
-                <label for="{{name}}"-{{@index}}>{{{options.rightLabel}}}</label>
+                <input type="checkbox" id="{{name}}"-{{@index}} data-checkbox-index="{{@index}}" data-checkbox-value="{{value}}" {{#if ../options.readonly}}readonly="readonly"{{/if}} {{#if name}}name="{{name}}"{{/if}} {{#each ../options.data}}data-{{@key}}="{{value}}"{{/each}}/>
+                <label for="{{name}}"-{{@index}}>{{{text}}}</label>
             </div>
             {{/each}}
 
         {{else}}
         <div>
-            <input type="checkbox" name="{{name}}" id="{{name}}" {{#if options.readonly}}readonly="readonly"{{/if}} {{#each options.data}}data-{{@key}}="{{value}}"{{/each}}>
+		    <input type="checkbox" id="{{name}}" {{#if options.readonly}}readonly="readonly"{{/if}} {{#if name}}name="{{name}}"{{/if}} {{#each options.data}}data-{{@key}}="{{value}}"{{/each}}/>
             <label for="{{name}}">
-                {{#if options.rightLabel}}
-                    {{{options.rightLabel}}}
-                {{else}}
-                    {{options.label}}
-                {{/if}}
+                {{{options.rightLabel}}}
             </label>
         </div>
         {{/if}}
