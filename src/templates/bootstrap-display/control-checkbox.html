@@ -1,0 +1,15 @@
+<script type="text/x-handlebars-template">
+    {{#if options.multiple}}
+        {{#each checkboxOptions as |cbValue cbKey|}}
+            {{#each ../data as |dValue dKey|}}
+                {{#compare cbValue.value dValue}}
+                    <div>{{{cbValue.text}}}</div>
+                {{/compare}}
+            {{/each}}
+        {{/each}}
+    {{else}}
+        {{#compare data true}}
+            <div>{{{options.rightLabel}}}</div>
+        {{/compare}}
+    {{/if}}
+</script>
