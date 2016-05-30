@@ -11,8 +11,8 @@
 
         {{else}}
         <div>
-		    <input type="checkbox" id="{{value}}-0 {{#if options.readonly}}readonly="readonly"{{/if}} {{#if name}}name="{{name}}"{{/if}} {{#each options.data}}data-{{@key}}="{{value}}"{{/each}}/>
-            <label for="{{value}}-0
+            <input type="checkbox" id="{{value}}-0" {{#if options.readonly}}readonly="readonly"{{/if}} {{#if name}}name="{{name}}"{{/if}} {{#each options.data}}data-{{@key}}="{{value}}"{{/each}}/>
+            <label for="{{value}}-0">
                 {{{options.rightLabel}}}
             </label>
         </div>
