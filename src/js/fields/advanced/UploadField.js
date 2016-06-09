@@ -950,7 +950,7 @@
          */
         getValueAsArray: function()
         {
-            return this.data;
+            return this.data || [];
         },
 
         /**
