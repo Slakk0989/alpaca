@@ -46,6 +46,13 @@
                 this.options.actionbarStyle = "top";
             }
 
+            if (!this.options.toolbarPosition) {
+                this.options.toolbarPosition = Alpaca.isEmpty(this.view.toolbarPosition) ? "top" : this.view.toolbarPosition;
+            }
+            if (!this.options.toolbarPosition) {
+                this.options.toolbarPosition = "top";
+            }
+
             if (!this.schema.items)
             {
                 this.schema.items = {};
@@ -357,17 +364,10 @@
                     {
                         var f = (function(i, data)
                         {
-                            return function(callback)
+                            return function(_done)
                             {
                                 self.addItem(i, itemSchema, itemOptions, data[i], function() {
-
-                                    // by the time we get here, we may have constructed a very large child chain of
-                                    // sub-dependencies and so we use nextTick() instead of a straight callback so as to
-                                    // avoid blowing out the stack size
-                                    Alpaca.nextTick(function() {
-                                        callback();
-                                    });
-
+                                    _done();
                                 });
                             };
                         })(i, data);
@@ -377,7 +377,7 @@
                         i++;
                     }
 
-                    Alpaca.series(funcs, function() {
+                    Alpaca.parallel(funcs, function() {
                         // nothing
                     });
                 });
@@ -390,7 +390,7 @@
          */
         getContainerValue: function()
         {
-            // if we're empty and we're also not required, then we hand back undefined
+            // if we're empty and we're also not required, then we hand back empty set
             if (this.children.length === 0 && !this.isRequired())
             {
                 return [];
@@ -430,6 +430,9 @@
 
             if (self.data && self.data.length > 0)
             {
+                var totalItemCount = self.data.length;
+                var itemsByIndex = {};
+
                 // all items within the array have the same schema and options
                 // so we only need to load this once
                 self.resolveItemSchemaOptions(function(itemSchema, itemOptions, circular) {
@@ -453,14 +456,7 @@
                             {
                                 self.createItem(index, itemSchema, itemOptions, value, function(item) {
 
-                                    items.push(item);
-
-                                    // by the time we get here, we may have constructed a very large child chain of
-                                    // sub-dependencies and so we use nextTick() instead of a straight callback so as to
-                                    // avoid blowing out the stack size
-                                    //Alpaca.nextTick(function() {
-                                    //    callback();
-                                    //});
+                                    itemsByIndex[index] = item;
 
                                     _done();
                                 });
@@ -471,11 +467,18 @@
                         funcs.push(pf);
                     }
 
-                    // run on the next-tick
-                    Alpaca.nextTick(function() {
-                        Alpaca.series(funcs, function(err) {
-                            callback(items);
-                        });
+                    Alpaca.parallel(funcs, function(err) {
+
+                        // restore intended order
+                        for (var i = 0; i < totalItemCount; i++)
+                        {
+                            var item = itemsByIndex[i];
+                            if (item) {
+                                items.push(item);
+                            }
+                        }
+
+                        callback(items);
                     });
 
                 });
@@ -539,6 +542,7 @@
                             "name": control.name,
                             "parentFieldId": self.getId(),
                             "actionbarStyle": self.options.actionbarStyle,
+							"toolbarLocation": self.options.toolbarLocation,
                             "view": self.view,
                             "data": itemData
                         });
@@ -621,7 +625,11 @@
             // handle $ref
             if (itemSchema && itemSchema["$ref"])
             {
-                var referenceId = itemSchema["$ref"];
+                var schemaReferenceId = itemSchema["$ref"];
+                var optionsReferenceId = itemSchema["$ref"];
+                if (itemOptions["$ref"]) {
+                    optionsReferenceId = itemOptions["$ref"];
+                }
 
                 var topField = this;
                 var fieldChain = [topField];
@@ -634,7 +642,7 @@
                 var originalItemSchema = itemSchema;
                 var originalItemOptions = itemOptions;
 
-                Alpaca.loadRefSchemaOptions(topField, referenceId, function(itemSchema, itemOptions) {
+                Alpaca.loadRefSchemaOptions(topField, schemaReferenceId, optionsReferenceId, function(itemSchema, itemOptions) {
 
                     // walk the field chain to see if we have any circularity
                     var refCount = 0;
@@ -642,11 +650,11 @@
                     {
                         if (fieldChain[i].schema)
                         {
-                            if ( (fieldChain[i].schema.id === referenceId) || (fieldChain[i].schema.id === "#" + referenceId))
+                            if ( (fieldChain[i].schema.id === schemaReferenceId) || (fieldChain[i].schema.id === "#" + schemaReferenceId))
                             {
                                 refCount++;
                             }
-                            else if ( (fieldChain[i].schema["$ref"] === referenceId))
+                            else if ( (fieldChain[i].schema["$ref"] === schemaReferenceId))
                             {
                                 refCount++;
                             }
@@ -917,15 +925,16 @@
 
                     var idx = v.path.lastIndexOf('/');
                     var lastSegment = v.path.substring(idx+1);
-                    if (lastSegment.indexOf("[") < 0 && lastSegment.indexOf("]") < 0)
+                    var lastIndex = -1;
+                    if (lastSegment.indexOf("[") > 0 && lastSegment.indexOf("]") > 0)
                     {
-                        lastSegment = lastSegment.substring(lastSegment.indexOf("[") + 1, lastSegment.indexOf("]"));
+                        lastIndex = parseInt(lastSegment.substring(lastSegment.indexOf("[") + 1, lastSegment.indexOf("]")));
                     }
 
-                    if (lastSegment !== i)
+                    if (lastIndex !== i)
                     {
                         v.prePath = v.path;
-                        v.path = v.path.substring(0, idx) + "/[" + i + "]";
+                        v.path = v.path.substring(0, idx) + "/" + lastSegment.substring(0, lastSegment.indexOf("[")) + "[" + i + "]";
                     }
 
                     // re-calculate name
@@ -1748,6 +1757,12 @@
                         "description": "The kind of top-level toolbar to render for the array field.  Either 'button' or 'link'.",
                         "type": "string",
                         "default": "button"
+                    },
+                    "toolbarPosition": {
+                        "title": "Toolbar Position",
+                        "description": "Location of the top-level toolbar to render for the array field.  Either 'top' or 'bottom'.",
+                        "type": "string",
+                        "default": "top"
                     },
                     "actionbarStyle": {
                         "title": "Actionbar Style",

@@ -56,6 +56,10 @@ var paths = {
             "src/js/ContainerField.js",
             "src/js/Form.js",
 
+            // cache implementations
+            "src/js/cache/memory.js",
+            "src/js/cache/null.js",
+
             // connectors
             "src/js/connectors/default.js",
             "src/js/connectors/cloudcms.js",
@@ -82,6 +86,7 @@ var paths = {
             "src/js/fields/advanced/CurrencyField.js",
             "src/js/fields/advanced/DateField.js",
             "src/js/fields/advanced/DatetimeField.js",
+            "src/js/fields/advanced/ChooserField.js",
             "src/js/fields/advanced/EditorField.js",
             "src/js/fields/advanced/EmailField.js",
             "src/js/fields/advanced/GridField.js",
@@ -118,12 +123,14 @@ var paths = {
             "src/js/messages/i18n/cs_CZ.js",
             "src/js/messages/i18n/de_AT.js",
             "src/js/messages/i18n/de_DE.js",
+            "src/js/messages/i18n/el_GR.js",
             "src/js/messages/i18n/es_ES.js",
             "src/js/messages/i18n/fi_FI.js",
             "src/js/messages/i18n/fr_FR.js",
             "src/js/messages/i18n/hr_HR.js",
             "src/js/messages/i18n/it_IT.js",
             "src/js/messages/i18n/ja_JP.js",
+            "src/js/messages/i18n/nb_NO.js",
             "src/js/messages/i18n/nl_BE.js",
             "src/js/messages/i18n/pl_PL.js",
             "src/js/messages/i18n/pt_BR.js",
@@ -548,7 +555,7 @@ gulp.task("build-site", function(cb)
 gulp.task("update-site-full", function(cb) {
 
     //console.log("update-site-full start");
-    return es.concat(
+    es.concat(
 
         // copy site into web
         gulp.src("build/site/**").pipe(gulp.dest("./build/web")),
@@ -562,7 +569,8 @@ gulp.task("update-site-full", function(cb) {
             .pipe(gulp.dest('./build/web/lib/alpaca'))
 
     ).pipe(es.wait(function() {
-        //console.log("update-site-full completed");
+        console.log("update-site-full completed");
+        cb();
     })).pipe(notify({message: "Built Alpaca Web Site"}));
 });
 
@@ -1042,8 +1050,25 @@ gulp.task("update-release-txt", function() {
 
 });
 
-gulp.task("full", function(cb) {
+gulp.task("website", function(cb) {
     runSequence("default", "site", "server", function () {
+        cb();
+    });
+});
+
+gulp.task("npmpackage", function(cb) {
+
+    var npmPkg = JSON.parse(JSON.stringify(pkg));
+    delete npmPkg.scripts.postinstall;
+    delete npmPkg.scripts.postupdate;
+
+    fs.writeFileSync("./package.json.npm", JSON.stringify(npmPkg, null, "  "));
+
+    cb();
+});
+
+gulp.task("_deploy", function(cb) {
+    runSequence("default", "site", "dist", "npmpackage", function () {
         cb();
     });
 });

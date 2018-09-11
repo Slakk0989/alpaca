@@ -102,38 +102,37 @@
             });
         },
 
-        /**
-         * @see Alpaca.Field#getValue
-         */
-        convertValue: function(val)
+        populateDisplayableText: function(model)
         {
-            var _this = this;
-
-            if (Alpaca.isArray(val))
+            // build out "displayableText"
+            var displayableTexts = [];
+            var map = {};
+            for (var i = 0; i < model.selectOptions.length; i++)
             {
-                $.each(val, function(index, itemVal) {
-                    $.each(_this.selectOptions, function(index2, selectOption) {
+                map[model.selectOptions[i].value] = model.selectOptions[i].text;
+            }
 
-                        if (selectOption.value === itemVal)
-                        {
-                            val[index] = selectOption.value;
-                        }
-
-                    });
-                });
+            if (Alpaca.isArray(model.data))
+            {
+                for (var i = 0; i < model.data.length; i++)
+                {
+                    var text = map[model.data[i]];
+                    if (text)
+                    {
+                        displayableTexts.push(text);
+                    }
+                }
             }
             else
             {
-                $.each(this.selectOptions, function(index, selectOption) {
-
-                    if (selectOption.value === val)
-                    {
-                        val = selectOption.value;
-                    }
-
-                });
+                var text = map[model.data];
+                if (text)
+                {
+                    displayableTexts.push(text);
+                }
             }
-            return val;
+
+            model.displayableText = displayableTexts.join(", ");
         },
 
         /**
@@ -143,7 +142,35 @@
         {
             var self = this;
 
+            var completionFn = function()
+            {
+                var scalarValue = self.convertToScalarValue(self.data);
+
+                for (var i = 0; i < self.selectOptions.length; i++)
+                {
+                    if (Alpaca.isArray(scalarValue))
+                    {
+                        for (var j = 0; j < scalarValue.length; j++)
+                        {
+                            if (scalarValue[j] === self.selectOptions[i].value)
+                            {
+                                self.selectOptions[i].selected = true;
+                            }
+                        }
+                    }
+                    else if (scalarValue === self.selectOptions[i].value)
+                    {
+                        self.selectOptions[i].selected = true;
+                        break;
+                    }
+                }
+
+                callback();
+            };
+
             this.base(model, function() {
+
+                self.populateDisplayableText(model);
 
                 if (self.options.dataSource)
                 {
@@ -167,16 +194,38 @@
                             self.setOptionLabels(_optionLabels);
                         }
 
-                        callback();
+                        completionFn();
 
                     });
                 }
                 else
                 {
-                    callback();
+                    completionFn();
                 }
 
             });
+        },
+
+        /**
+         * Used to convert a reference object to an ID.
+         *
+         * @param data
+         * @returns {*}
+         */
+        convertToScalarValue: function(data)
+        {
+            return data;
+        },
+
+        /**
+         * Used to convert an ID back to a reference object.
+         *
+         * @param scalarValue
+         * @param callback
+         */
+        convertToDataValue: function(scalarValue, callback)
+        {
+            callback(null, scalarValue);
         }
 
 

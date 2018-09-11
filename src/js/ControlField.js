@@ -364,6 +364,8 @@
             },
 
             /**
+             * Gets the current value from the control value.
+             *
              * Extension point
              */
             getControlValue: function()
@@ -388,7 +390,7 @@
                     return true;
                 }
 
-                return ($.inArray(val, this.getEnum()) > -1);
+                return Alpaca.inArray(this.getEnum(), val);
             },
 
             /**
@@ -506,6 +508,9 @@
                     var x = self.onKeyDown.call(self, e);
                     if (x !== false) {
                         x = self.trigger("keydown", e);
+
+                        // propagate up the chain that something moved
+                        self.triggerWithPropagation("nested_change", e);
                     }
 
                     return x;
@@ -601,6 +606,7 @@
 
                 if (this.control && this.control.length > 0)
                 {
+                    $(this.control).addClass("disabled");
                     $(this.control).prop("disabled", true);
                 }
             },
@@ -618,6 +624,7 @@
 
                 if (this.control && this.control.length > 0)
                 {
+                    $(this.control).removeClass("disabled");
                     $(this.control).prop("disabled", false);
                 }
             },
@@ -907,18 +914,20 @@
                 }
                 else if (Alpaca.isArray(self.options.dataSource))
                 {
-                    for (var i = 0; i < self.options.dataSource.length; i++)
+                    var ds = self.options.dataSource;
+
+                    for (var i = 0; i < ds.length; i++)
                     {
-                        if (typeof(self.options.dataSource[i]) === "string")
+                        if (typeof(ds[i]) === "string")
                         {
                             array.push({
-                                "text": self.options.dataSource[i],
-                                "value": self.options.dataSource[i]
+                                "text": ds[i],
+                                "value": ds[i]
                             });
                         }
-                        else if (Alpaca.isObject(self.options.dataSource[i]))
+                        else if (Alpaca.isObject(ds[i]))
                         {
-                            array.push(self.options.dataSource[i]);
+                            array.push(ds[i]);
                         }
                     }
 

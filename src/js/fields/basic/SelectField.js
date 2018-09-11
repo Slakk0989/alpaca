@@ -50,34 +50,48 @@
                 delete this.schema.items.minItems;
             }
 
-        },
-
-        /**
-         * @see Alpaca.ControlField#getControlValue
-         */
-        getControlValue: function()
-        {
-            var val = this._getControlVal(true);
-            if (typeof(val) === "undefined")
+            if (!self.options.multiselect && $.fn.multiselect)
             {
-                val = this.data;
+                self.options.multiselect = {};
             }
 
-            return this.convertValue(val);
+            if (self.options.multiselect && typeof(self.options.multiselect.disableIfEmpty) === "undefined")
+            {
+                self.options.multiselect.disableIfEmpty = true;
+            }
         },
+
+        getValue: function()
+        {
+            var self = this;
+
+            if (self.schema.type === "object")
+            {
+                return this.data;
+            }
+
+            return this.base();
+        },
+
 
         /**
          * @see Alpaca.Field#setValue
          */
         setValue: function(val)
         {
+            var self = this;
+
+            var newScalarVal = self.convertToScalarValue(val);
+            var currentScalarVal = self.convertToScalarValue(self.getValue());
+
             if (Alpaca.isArray(val))
             {
-                if (!Alpaca.compareArrayContent(val, this.getValue()))
+                // if values are different, then set
+                if (!Alpaca.compareArrayContent(newScalarVal, currentScalarVal))
                 {
-                    if (!Alpaca.isEmpty(val) && this.control)
+                    if (!Alpaca.isEmpty(newScalarVal) && this.control)
                     {
-                        this.control.val(val);
+                        this.control.val(newScalarVal);
                     }
 
                     this.base(val);
@@ -85,17 +99,21 @@
             }
             else
             {
-                if (val !== this.getValue())
+                var apply = false;
+                if (Alpaca.isEmpty(newScalarVal) && Alpaca.isEmpty(currentScalarVal))
                 {
-                    /*
-                    if (!Alpaca.isEmpty(val) && this.control)
+                    apply = true;
+                }
+                else if (newScalarVal !== currentScalarVal)
+                {
+                    apply = true;
+                }
+
+                if (apply)
+                {
+                    if (self.control && typeof(newScalarVal) !== "undefined" && newScalarVal !== null)
                     {
-                        this.control.val(val);
-                    }
-                    */
-                    if (this.control && typeof(val) != "undefined" && val != null)
-                    {
-                        this.control.val(val);
+                        self.control.val(newScalarVal);
                     }
 
                     this.base(val);
@@ -165,36 +183,6 @@
             var self = this;
 
             this.base(model, function() {
-
-                // build out "displayableText"
-                var displayableTexts = [];
-                var map = {};
-                for (var i = 0; i < model.selectOptions.length; i++)
-                {
-                    map[model.selectOptions[i].value] = model.selectOptions[i].text;
-                }
-
-                if (Alpaca.isArray(model.data))
-                {
-                    for (var i = 0; i < model.data.length; i++)
-                    {
-                        var text = map[model.data[i]];
-                        if (text)
-                        {
-                            displayableTexts.push(text);
-                        }
-                    }
-                }
-                else
-                {
-                    var text = map[model.data];
-                    if (text)
-                    {
-                        displayableTexts.push(text);
-                    }
-                }
-
-                model.displayableText = displayableTexts.join(", ");
 
                 callback();
 
@@ -283,10 +271,12 @@
 
                     $.each(val, function(i,v) {
 
-                        if ($.inArray(v, _this.schema["enum"]) <= -1)
+                        var scalarValue = _this.convertToScalarValue(v);
+
+                        var inArray = Alpaca.inArray(_this.schema["enum"], scalarValue);
+                        if (!inArray)
                         {
                             isValid = false;
-                            return false;
                         }
 
                     });
@@ -300,7 +290,9 @@
                         val = val[0];
                     }
 
-                    return ($.inArray(val, this.schema["enum"]) > -1);
+                    var scalarValue = _this.convertToScalarValue(val);
+
+                    return Alpaca.inArray(this.schema["enum"], scalarValue);
                 }
             }
             else
@@ -312,16 +304,25 @@
         /**
          * @see Alpaca.Field#onChange
          */
-        onChange: function(e)
-        {
-            this.base(e);
+        onChange: function(e) {
 
-            var _this = this;
+            var self = this;
 
-            Alpaca.later(25, this, function() {
-                var v = _this.getValue();
-                _this.setValue(v);
-                _this.refreshValidationState();
+            var scalarValue = self.getControlValue();
+
+            self.convertToDataValue(scalarValue, function(err, data) {
+
+                // store back into data element
+                self.data = data;
+
+                // store scalar value onto control
+                self.control.val(scalarValue);
+
+                // trigger observables and updates
+                self.updateObservable();
+                self.triggerUpdate();
+                self.refreshValidationState();
+
             });
         },
 
@@ -400,7 +401,40 @@
                     onFocusCallback(this);
                 }
             }
+        },
+
+        /**
+         * @override
+         */
+        disable: function()
+        {
+            var self = this;
+
+            this.base();
+
+            if (self.options.multiselect)
+            {
+                $(self.getControlEl()).multiselect("disable");
+            }
+        },
+
+        /**
+         * @override
+         */
+        enable: function()
+        {
+            var self = this;
+
+            this.base();
+
+            if (self.options.multiselect)
+            {
+                $(self.getControlEl()).multiselect("enable");
+            }
         }
+
+
+
 
         /* builder_helpers */
         ,
