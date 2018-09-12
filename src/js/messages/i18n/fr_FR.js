@@ -50,7 +50,8 @@
 				"size": "Taille",
 				"actions": "Actions",
 				"filetypeNotAccepted": "Type de fichier non accepté : {0}",
-				"filesizeTooBig": "Fichier trop gros : {0}"
+				"filesizeTooBig": "Fichier trop gros : {0}",
+				"delete": "Supprimer"
             }
         }
     });

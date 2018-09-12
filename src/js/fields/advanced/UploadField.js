@@ -150,7 +150,8 @@
             {
                 self.options.buttons.push({
                     "key": "delete",
-                    "isDelete": true
+                    "isDelete": true,
+                    "deleteMessage": self.getMessage("delete")
                 });
             }
 
@@ -1231,7 +1232,8 @@
         "size": "Size",
         "actions": "Actions",
         "filetypeNotAccepted": "Not an accepted file type: {0}",
-        "filesizeTooBig": "Filesize is too big: {0}"
+        "filesizeTooBig": "Filesize is too big: {0}",
+        "delete": "Delete"
     });
 
     // https://github.com/private-face/jquery.bind-first/blob/master/dev/jquery.bind-first.js

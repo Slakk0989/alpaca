@@ -31,7 +31,7 @@
             {{#if buttons}}
                 {{#each buttons}}
                     {{#if isDelete}}
-                        <button class="delete btn btn-danger" data-file-index="{{../fileIndex}}" data-button-key="{{key}}">
+                        <button class="delete btn btn-danger" title="{{deleteMessage}}" data-file-index="{{../fileIndex}}" data-button-key="{{key}}">
                             <i class="glyphicon glyphicon-trash glyphicon-white"></i>
                         </button>
                     {{else}}
