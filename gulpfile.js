@@ -83,6 +83,7 @@ var paths = {
             "src/js/fields/advanced/ColorField.js",
             "src/js/fields/advanced/ColorPickerField.js",
             "src/js/fields/advanced/CountryField.js",
+            "src/js/fields/advanced/CountryLabelField.js",
             "src/js/fields/advanced/CurrencyField.js",
             "src/js/fields/advanced/DateField.js",
             "src/js/fields/advanced/DatetimeField.js",
